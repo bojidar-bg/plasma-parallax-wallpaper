@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<kcfg xmlns="http://www.kde.org/standards/kcfg/1.0"
+      xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+      xsi:schemaLocation="http://www.kde.org/standards/kcfg/1.0
+      http://www.kde.org/standards/kcfg/1.0/kcfg.xsd" >
+  <kcfgfile name=""/>
+
+  <group name="General">
+    <entry name="Color" type="Color">
+      <label>Background color of the wallpaper</label>
+      <default>#000000</default>
+    </entry>
+    <entry name="Image" type="String">
+      <label>Image used by the wallpaper</label>
+      <default></default>
+    </entry>
+    <entry name="SlidePaths" type="String">
+      <label></label>
+      <default></default>
+    </entry>
+    <entry name="SlideDuration" type="int">
+      <label>The time over which parallax motion completes</label>
+      <default>200</default>
+    </entry>
+    <entry name="SlideDelay" type="int">
+      <label>The delay before starting parallax motion</label>
+      <default>0</default>
+    </entry>
+    <entry name="Zoom" type="int">
+      <label>The amount by which the image is zoomed in, for the purposes of parallax motion</label>
+      <default>120</default>
+    </entry>
+    <entry name="Crop" type="int">
+      <label>The percentage by which the sides of the image are cropped, in order for horizontal and vertical motion to be balanced</label>
+      <default>0</default>
+    </entry>
+    <entry name="DesktopRows" type="int">
+      <label>The amount of desktop rows the workspace has</label>
+      <default>3</default>
+    </entry>
+  </group>
+
+</kcfg>
