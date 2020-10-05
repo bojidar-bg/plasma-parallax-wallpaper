@@ -51,7 +51,7 @@ Item {
         property var dy: parent.height - height
         
         x: lerp(dx * ox, dy * ox + (dx - dy) / 2, dx < dy ? crop : 0)
-        y: lerp(dy * oy, dx * oy- (dy - dx) / 2, dy < dx ? crop : 0)
+        y: lerp(dy * oy, dx * oy + (dy - dx) / 2, dy < dx ? crop : 0)
         
         function lerp(x, y, t) {return (y - x) * t + x}
         
