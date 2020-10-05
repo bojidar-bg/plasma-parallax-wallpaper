@@ -22,10 +22,6 @@
       <label>The time over which parallax motion completes</label>
       <default>200</default>
     </entry>
-    <entry name="SlideDelay" type="int">
-      <label>The delay before starting parallax motion</label>
-      <default>0</default>
-    </entry>
     <entry name="Zoom" type="int">
       <label>The amount by which the image is zoomed in, for the purposes of parallax motion</label>
       <default>120</default>

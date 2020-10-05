@@ -56,46 +56,18 @@ Item {
         function lerp(x, y, t) {return (y - x) * t + x}
         
         source: wallpaper.configuration.Image
-        
-        function buildBezierCurve(p) {
-            if (p > 0)
-            {
-                return [
-                    0, 0, // p0 out
-                    p, 0, // p1 in
-                    p, 0, // p1 
-                    p, 0, // p1 out
-                    1, 1, // p2 in
-                    1, 1 // p2
-                ]
-            }
-            else
-            {
-                let y = p / (p + 1) // y-intercept
-                return [
-                    0, 0, // p0 out
-                    0.0001, y, // p1 in
-                    0.0001, y, // p1 
-                    0.0001, y, // p1 out
-                    1, 1, // p2 in
-                    1, 1 // p2
-                ]
-            }
-        }
                 
         Behavior on x {
             NumberAnimation {
-                duration: wallpaper.configuration.SlideDuration + wallpaper.configuration.SlideDelay
-                easing.type: Easing.Bezier
-                easing.bezierCurve: image.buildBezierCurve(wallpaper.configuration.SlideDelay / duration)
+                duration: wallpaper.configuration.SlideDuration
+                easing.type: Easing.OutCubic
             }
         }
         
         Behavior on y {
             NumberAnimation {
-                duration: wallpaper.configuration.SlideDuration + wallpaper.configuration.SlideDelay
-                easing.type: Easing.Bezier
-                easing.bezierCurve: image.buildBezierCurve(wallpaper.configuration.SlideDelay / duration)
+                duration: wallpaper.configuration.SlideDuration
+                easing.type: Easing.OutCubic
             }
         }
     }

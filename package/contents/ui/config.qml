@@ -37,7 +37,6 @@ ColumnLayout {
     property alias cfg_Crop: cropSpinBox.value
     property alias cfg_DesktopRows: rowsSpinBox.value
     property alias cfg_SlideDuration: durationSpinBox.value
-    property alias cfg_SlideDelay: delaySpinBox.value
 
     function saveConfig() {
         mainLoader.item && mainLoader.item.saveConfig();
@@ -141,31 +140,6 @@ ColumnLayout {
                 maximumValue: 100
                 stepSize: 1
                 suffix: i18n("%")
-            }
-        }
-        
-        Item {
-            Layout.fillWidth: true
-        }
-    }
-    
-    RowLayout {
-        Item {
-            Layout.fillWidth: true
-        }
-        
-        Row {
-            spacing: units.smallSpacing
-            QtControls.Label {
-                anchors.verticalCenter: delaySpinBox.verticalCenter
-                text: i18nd("com.github.bojidar-bg.parallax", "Slide Delay:")
-            }
-            QtControls.SpinBox {
-                id: delaySpinBox
-                minimumValue: -2000
-                maximumValue: 2000
-                stepSize: 10
-                suffix: " " + i18n("ms")
             }
         }
         
