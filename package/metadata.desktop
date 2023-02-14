@@ -1,5 +1,6 @@
 [Desktop Entry]
 Name=Parallax
+Summary=Parallax desktop wallpaper
 
 Type=Service
 Icon=preferences-desktop-wallpaper
@@ -9,6 +10,6 @@ X-KDE-PluginInfo-Author=Bojidar Marinov
 X-KDE-PluginInfo-Email=bojidar.marinov.bg@gmail.com
 X-KDE-PluginInfo-Name=com.github.bojidar-bg.parallax
 X-KDE-PluginInfo-License=LGPL-2.1+
-X-KDE-PluginInfo-Version=0.2
+X-KDE-PluginInfo-Version=0.3
 X-KDE-PluginInfo-Website=https://github.com/bojidar-bg/plasma-parallax-wallpaper
 X-Plasma-MainScript=ui/main.qml
