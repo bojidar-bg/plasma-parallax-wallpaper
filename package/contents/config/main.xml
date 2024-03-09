@@ -6,10 +6,6 @@
   <kcfgfile name=""/>
 
   <group name="General">
-    <entry name="Color" type="Color">
-      <label>Background color of the wallpaper</label>
-      <default>#000000</default>
-    </entry>
     <entry name="Image" type="String">
       <label>Image used by the wallpaper</label>
       <default></default>

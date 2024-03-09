@@ -18,7 +18,6 @@ import org.kde.kcmutils as KCM
 KCM.GridDelegate {
     id: wallpaperDelegate
 
-    property alias color: backgroundRect.color
     opacity: model.pendingDeletion ? 0.5 : 1
     scale: index, 1 // Workaround for https://bugreports.qt.io/browse/QTBUG-107458
 
@@ -57,7 +56,6 @@ KCM.GridDelegate {
 
     thumbnail: Rectangle {
         id: backgroundRect
-        color: cfg_Color
         anchors.fill: parent
 
         Kirigami.Icon {
@@ -75,14 +73,7 @@ KCM.GridDelegate {
             smooth: true
             pixmap: model.screenshot
             fillMode: {
-                return QPixmapItem.PreserveAspectFit;
-            }
-        }
-
-        Behavior on color {
-            ColorAnimation {
-                duration: Kirigami.Units.longDuration
-                easing.type: Easing.InOutQuad
+                return QPixmapItem.PreserveAspectCrop;
             }
         }
     }

@@ -32,8 +32,6 @@ ColumnLayout {
     property var screen: Screen
     property var screenSize: !!screen.geometry ? Qt.size(screen.geometry.width, screen.geometry.height):  Qt.size(screen.width, screen.height)
 
-    property alias cfg_Color: colorButton.color
-    property color cfg_ColorDefault
     property string cfg_Image
     property string cfg_ImageDefault
     property var cfg_SlidePaths: []
@@ -93,16 +91,6 @@ ColumnLayout {
         Component.onCompleted: function() {
             if (typeof appearanceRoot !== "undefined") {
                 twinFormLayouts.push(appearanceRoot.parentLayout);
-            }
-        }
-
-        KQuickControls.ColorButton {
-            id: colorButton
-            Kirigami.FormData.label: i18nd("plasma_wallpaper_org.kde.image", "Background:")
-            dialogTitle: i18nd("plasma_wallpaper_org.kde.image", "Select Background Color")
-
-            KCM.SettingHighlighter {
-                highlight: cfg_Color != cfg_ColorDefault
             }
         }
 

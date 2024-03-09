@@ -90,9 +90,7 @@ Item {
 
         view.reuseItems: true
 
-        view.delegate: WallpaperDelegate {
-            color: cfg_Color
-        }
+        view.delegate: WallpaperDelegate {}
     }
 
     KCM.SettingHighlighter {
