@@ -1,7 +1,6 @@
 cmake_minimum_required(VERSION 3.16)
 
 project(plasma-parallax)
-set(PROJECT_VERSION "0.4")
 
 set(PLASMA_VERSION "6.0.0")
 set(QT_MIN_VERSION "6.6.0")
