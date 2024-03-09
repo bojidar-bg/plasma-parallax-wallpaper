@@ -56,9 +56,7 @@ WallpaperItem {
         y: lerp(dy * oy, dx * oy + (dy - dx) / 2, dy < dx ? crop : 0)
         
         function lerp(x, y, t) {return (y - x) * t + x}
-        
-        source: wallpaper.configuration.Image
-                
+
         Behavior on x {
             NumberAnimation {
                 duration: wallpaper.configuration.SlideDuration
@@ -71,6 +69,15 @@ WallpaperItem {
                 duration: wallpaper.configuration.SlideDuration
                 easing.type: Easing.OutCubic
             }
+        }
+
+        source: mediaProxy.modelImage
+
+        Wallpaper.MediaProxy {
+            id: mediaProxy
+            source: wallpaper.configuration.Image
+
+            targetSize: Qt.size(root.width * Screen.devicePixelRatio, root.height * Screen.devicePixelRatio)
         }
     }
 }
