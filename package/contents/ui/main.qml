@@ -1,17 +1,18 @@
 /*
     SPDX-FileCopyrightText: 2020 Bojidar Marinov <bojidar.marinov.bg@gmail.com>
-    SPDX-License-Identifier: LGPL-2.1-or-later
+
+    SPDX-License-Identifier: GPL-2.0-or-later
 */
 
-import QtQuick 2.1
+import QtQuick
+import org.kde.plasma.core as PlasmaCore
+import org.kde.plasma.wallpapers.image as Wallpaper
+import org.kde.plasma.plasmoid
+import org.kde.taskmanager as TaskManager
 
-import org.kde.plasma.core 2.0
-import org.kde.plasma.extras 2.0 as PlasmaExtras
-
-import org.kde.kwindowsystem 1.0 as KWindowSystem
 
 
-Item {
+WallpaperItem {
     id: root
 
     //public API, the C++ part will look for those
@@ -29,24 +30,25 @@ Item {
         }
     }
     
-    KWindowSystem.KWindowSystem {
-        id: kwindowsystem
+    TaskManager.VirtualDesktopInfo {
+        id: virtualdesktopinfo
     }
     
     Image {
         id: image
         property var zoom: wallpaper.configuration.Zoom / 100
         property var crop: wallpaper.configuration.Crop / 100
-        property var desktopRows: wallpaper.configuration.DesktopRows
-        property var desktopCols: Math.round(kwindowsystem.numberOfDesktops / wallpaper.configuration.DesktopRows)
+        property var desktopRows: virtualdesktopinfo.desktopLayoutRows
+        property var desktopCols: Math.round(virtualdesktopinfo.numberOfDesktops / desktopRows)
+        property var currentDesktop: virtualdesktopinfo.desktopIds.indexOf(virtualdesktopinfo.currentDesktop)
         property var aspect: implicitHeight / implicitWidth
         property var coverWidth: Math.max(parent.width, parent.height / aspect)
         
         width: coverWidth * zoom
         height: coverWidth * aspect * zoom
         
-        property var ox: ((kwindowsystem.currentDesktop - 1) % desktopCols) / (desktopCols - 1)
-        property var oy: Math.floor((kwindowsystem.currentDesktop - 1) / desktopCols) / (desktopRows - 1)
+        property var ox: (currentDesktop % desktopCols) / (desktopCols - 1)
+        property var oy: Math.floor(currentDesktop / desktopCols) / (desktopRows - 1)
         property var dx: parent.width - width
         property var dy: parent.height - height
         

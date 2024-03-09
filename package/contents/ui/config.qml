@@ -1,176 +1,199 @@
 /*
- *  Copyright 2020 Bojidar Marinov
- *  Copyright 2013 Marco Martin <mart@kde.org>
- *  Copyright 2014 Kai Uwe Broulik <kde@privat.broulik.de>
- *
- *  This program is free software; you can redistribute it and/or modify
- *  it under the terms of the GNU General Public License as published by
- *  the Free Software Foundation; either version 2 of the License, or
- *  (at your option) any later version.
- *
- *  This program is distributed in the hope that it will be useful,
- *  but WITHOUT ANY WARRANTY; without even the implied warranty of
- *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *  GNU General Public License for more details.
- *
- *  You should have received a copy of the GNU General Public License
- *  along with this program; if not, write to the Free Software
- *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  2.010-1301, USA.
+    SPDX-FileCopyrightText: 2020 Bojidar Marinov <bojidar.marinov.bg@gmail.com>
+    SPDX-FileCopyrightText: 2013 Marco Martin <mart@kde.org>
+    SPDX-FileCopyrightText: 2014 Kai Uwe Broulik <kde@privat.broulik.de>
+    SPDX-FileCopyrightText: 2019 David Redondo <kde@david-redondo.de>
+
+    SPDX-License-Identifier: GPL-2.0-or-later
+
+    (based on https://invent.kde.org/plasma/plasma-workspace/-/blob/master/wallpapers/image/imagepackage/contents/ui/config.qml, 2024-03-09)
+*/
+
+
+import QtQuick
+import QtQuick.Controls as QtControls2
+import QtQuick.Layouts
+import org.kde.plasma.wallpapers.image as PlasmaWallpaper
+import org.kde.kquickcontrols as KQuickControls
+import org.kde.kquickcontrolsaddons
+import org.kde.newstuff as NewStuff
+import org.kde.kcmutils as KCM
+import org.kde.kirigami as Kirigami
+
+/**
+ * For proper alignment, an ancestor **MUST** have id "appearanceRoot" and property "parentLayout"
  */
-
-import QtQuick 2.5
-import QtQuick.Controls 1.0 as QtControls
-import QtQuick.Dialogs 1.1 as QtDialogs
-import QtQuick.Layouts 1.0
-import QtQuick.Window 2.0 // for Screen
-//We need units from it
-import org.kde.plasma.core 2.0 as Plasmacore
-import org.kde.plasma.wallpapers.image 2.0 as Wallpaper
-import org.kde.kquickcontrolsaddons 2.0
-
 ColumnLayout {
     id: root
-    property alias cfg_Color: colorDialog.color
+
+    property var configDialog
+    property var wallpaperConfiguration: wallpaper.configuration
+    property var parentLayout
+    property var screen: Screen
+    property var screenSize: !!screen.geometry ? Qt.size(screen.geometry.width, screen.geometry.height):  Qt.size(screen.width, screen.height)
+
+    property alias cfg_Color: colorButton.color
+    property color cfg_ColorDefault
     property string cfg_Image
-    property var cfg_SlidePaths: ""
+    property string cfg_ImageDefault
+    property var cfg_SlidePaths: []
+    property var cfg_SlidePathsDefault: []
     property alias cfg_Zoom: zoomSpinBox.value
+    property int cfg_ZoomDefault
     property alias cfg_Crop: cropSpinBox.value
-    property alias cfg_DesktopRows: rowsSpinBox.value
+    property int cfg_CropDefault
     property alias cfg_SlideDuration: durationSpinBox.value
+    property int cfg_SlideDurationDefault
+
+    signal configurationChanged()
+    /**
+     * Emitted when the user finishes adding images using the file dialog.
+     */
+    signal wallpaperBrowseCompleted();
+
+    onScreenChanged: function() {
+        if (thumbnailsLoader.item) {
+            thumbnailsLoader.item.screenSize = !!root.screen.geometry ? Qt.size(root.screen.geometry.width, root.screen.geometry.height):  Qt.size(root.screen.width, root.screen.height);
+        }
+    }
 
     function saveConfig() {
-        mainLoader.item && mainLoader.item.saveConfig();
+        imageWallpaper.wallpaperModel.commitAddition();
+        imageWallpaper.wallpaperModel.commitDeletion();
     }
 
-    QtDialogs.ColorDialog {
-        id: colorDialog
-        modality: Qt.WindowModal
-        showAlphaChannel: false
-        title: i18nd("plasma_applet_org.kde.image", "Select Background Color")
-    }
-    
-    SystemPalette {
-        id: syspal
+    function openChooserDialog() {
+        const dialogComponent = Qt.createComponent("AddFileDialog.qml");
+        dialogComponent.createObject(root);
+        dialogComponent.destroy();
     }
 
-    RowLayout {
-        Item {
-            Layout.fillWidth: true
+    PlasmaWallpaper.ImageBackend {
+        id: imageWallpaper
+        renderingMode: PlasmaWallpaper.ImageBackend.SingleImage
+        targetSize: {
+            // Lock screen configuration case
+            return Qt.size(root.screenSize.width * root.screen.devicePixelRatio, root.screenSize.height * root.screen.devicePixelRatio)
         }
-        
-        Row {
-            spacing: units.smallSpacing
-            QtControls.Label {
-                anchors.verticalCenter: colorButton.verticalCenter
-                text: i18nd("plasma_applet_org.kde.image", "Background Color:")
-            }
-            QtControls.Button {
-                id: colorButton
-                width: units.gridUnit * 3
-                text: " " // needed so it gets a proper height...
-                onClicked: colorDialog.open()
+        onSlidePathsChanged: cfg_SlidePaths = slidePaths
+        onSlideshowModeChanged: cfg_SlideshowMode = slideshowMode
+        onSlideshowFoldersFirstChanged: cfg_SlideshowFoldersFirst = slideshowFoldersFirst
 
-                Rectangle {
-                    id: colorRect
-                    anchors.centerIn: parent
-                    width: parent.width - 2 * units.smallSpacing
-                    height: theme.mSize(theme.defaultFont).height
-                    color: colorDialog.color
-                }
-            }
-        }
-        
-        Item {
-            Layout.fillWidth: true
-        }
-        
-        Row {
-            spacing: units.smallSpacing
-            QtControls.Label {
-                anchors.verticalCenter: rowsSpinBox.verticalCenter
-                text: i18nd("com.github.bojidar-bg.parallax", "Desktop Rows:")
-            }
-            QtControls.SpinBox {
-                id: rowsSpinBox
-                minimumValue: 0
-                maximumValue: 40
-                stepSize: 1
-                suffix: " " + i18n("Rows")
-            }
-        }
-        
-        Item {
-            Layout.fillWidth: true
-        }
+        onSettingsChanged: root.configurationChanged()
     }
-    
-    RowLayout {
-        Item {
-            Layout.fillWidth: true
-        }
-        
-        Row {
-            spacing: units.smallSpacing
-            QtControls.Label {
-                anchors.verticalCenter: zoomSpinBox.verticalCenter
-                text: i18nd("com.github.bojidar-bg.parallax", "Parallax Zoom Factor:")
-            }
-            QtControls.SpinBox {
-                id: zoomSpinBox
-                minimumValue: 100
-                maximumValue: 400
-                stepSize: 1
-                suffix: i18n("%")
+
+    onCfg_SlidePathsChanged: {
+        if (cfg_SlidePaths)
+            imageWallpaper.slidePaths = cfg_SlidePaths
+    }
+
+    Kirigami.FormLayout {
+        id: formLayout
+
+        Component.onCompleted: function() {
+            if (typeof appearanceRoot !== "undefined") {
+                twinFormLayouts.push(appearanceRoot.parentLayout);
             }
         }
-        
-        Item {
-            Layout.fillWidth: true
-        }
-        
-        Row {
-            spacing: units.smallSpacing
-            QtControls.Label {
-                anchors.verticalCenter: cropSpinBox.verticalCenter
-                text: i18nd("com.github.bojidar-bg.parallax", "Parallax Crop Factor:")
-            }
-            QtControls.SpinBox {
-                id: cropSpinBox
-                minimumValue: 0
-                maximumValue: 100
-                stepSize: 1
-                suffix: i18n("%")
+
+        KQuickControls.ColorButton {
+            id: colorButton
+            Kirigami.FormData.label: i18nd("plasma_wallpaper_org.kde.image", "Background:")
+            dialogTitle: i18nd("plasma_wallpaper_org.kde.image", "Select Background Color")
+
+            KCM.SettingHighlighter {
+                highlight: cfg_Color != cfg_ColorDefault
             }
         }
-        
-        Item {
-            Layout.fillWidth: true
-        }
-        
-        Row {
-            spacing: units.smallSpacing
-            QtControls.Label {
-                anchors.verticalCenter: durationSpinBox.verticalCenter
-                text: i18nd("com.github.bojidar-bg.parallax", "Slide Duration:")
-            }
-            QtControls.SpinBox {
-                id: durationSpinBox
-                minimumValue: 0
-                maximumValue: 2000
-                stepSize: 10
-                suffix: " " + i18n("ms")
+
+        QtControls2.SpinBox {
+            id: durationSpinBox
+            from: 0
+            to: 2000
+            stepSize: 10
+            textFromValue: function(value) { return value + " ms"; } // https://bugreports.qt.io/browse/QTBUG-51022
+            valueFromText: function(text) { return Number(text.split(" ")[0]); }
+
+            Kirigami.FormData.label: i18nd("com.github.bojidar-bg.parallax", "Slide Duration:")
+            KCM.SettingHighlighter {
+                highlight: cfg_SlideDuration != cfg_SlideDurationDefault
             }
         }
-        
-        Item {
-            Layout.fillWidth: true
+
+        QtControls2.SpinBox {
+            id: zoomSpinBox
+            from: 100
+            to: 400
+            stepSize: 1
+            textFromValue: function(value) { return value + "  %"; } // https://bugreports.qt.io/browse/QTBUG-51022
+            valueFromText: function(text) { return Number(text.split(" ")[0]); }
+
+            Kirigami.FormData.label: i18nd("com.github.bojidar-bg.parallax", "Parallax Zoom Factor:")
+            KCM.SettingHighlighter {
+                highlight: cfg_Zoom != cfg_ZoomDefault
+            }
+        }
+
+        QtControls2.SpinBox {
+            id: cropSpinBox
+            from: 0
+            to: 100
+            stepSize: 1
+            textFromValue: function(value) { return value + " %"; } // https://bugreports.qt.io/browse/QTBUG-51022
+            valueFromText: function(text) { return Number(text.split(" ")[0]); }
+
+            Kirigami.FormData.label: i18nd("com.github.bojidar-bg.parallax", "Parallax Crop Factor:")
+            KCM.SettingHighlighter {
+                highlight: cfg_Crop != cfg_CropDefault
+            }
         }
     }
 
-    Loader {
-        id: mainLoader
+    DropArea {
         Layout.fillWidth: true
         Layout.fillHeight: true
-        Component.onCompleted: setSource('ConfigImagePicker.qml')
+
+        onEntered: drag => {
+            if (drag.hasUrls) {
+                drag.accept();
+            }
+        }
+        onDropped: drop => {
+            drop.urls.forEach(function (url) {
+                imageWallpaper.addUsersWallpaper(url);
+            });
+            // Scroll to top to view added images
+            thumbnailsLoader.item.view.positionViewAtIndex(0, GridView.Beginning);
+        }
+
+        Loader {
+            id: thumbnailsLoader
+            anchors.fill: parent
+
+            function loadWallpaper() {
+                let source = "ThumbnailsComponent.qml";
+
+                let props = {screenSize: screenSize};
+
+                thumbnailsLoader.setSource(source, props);
+            }
+        }
+
+        Connections {
+            target: configDialog
+            function onCurrentWallpaperChanged() {
+                thumbnailsLoader.loadWallpaper();
+            }
+        }
+
+        Component.onCompleted: () => {
+            thumbnailsLoader.loadWallpaper();
+        }
+
+    }
+
+    Component.onDestruction: {
+        if (wallpaperConfiguration)
+            wallpaperConfiguration.PreviewImage = "null";
     }
 }

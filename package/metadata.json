@@ -10,7 +10,7 @@
         "Description": "Parallax desktop wallpaper",
         "Icon": "preferences-desktop-wallpaper",
         "Id": "com.github.bojidar-bg.parallax",
-        "License": "LGPL-2.1+",
+        "License": "GPL-2.0+",
         "Name": "Parallax",
         "Version": "0.3",
         "Website": "https://github.com/bojidar-bg/plasma-parallax-wallpaper"
