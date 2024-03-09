@@ -86,10 +86,15 @@ KCM.GridDelegate {
     }
 
     onClicked: {
-        cfg_Image = model.packageName || model.path;
-        if (typeof wallpaper !== "undefined") {
-            wallpaper.configuration.PreviewImage = cfg_Image;
+        if (isMask) {
+            cfg_Masks[currentLayer] = model.packageName || model.path;
+            cfg_Masks = cfg_Masks;
+        } else {
+            cfg_Images[currentLayer] = model.packageName || model.path;
+            cfg_Images = cfg_Images;
         }
-        GridView.currentIndex = index;
+        console.log(cfg_Masks, cfg_Images)
+        root.configurationChanged();
+        GridView.view.currentIndex = index;
     }
 }

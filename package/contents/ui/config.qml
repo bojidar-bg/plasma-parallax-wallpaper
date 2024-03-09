@@ -32,16 +32,36 @@ ColumnLayout {
     property var screen: Screen
     property var screenSize: !!screen.geometry ? Qt.size(screen.geometry.width, screen.geometry.height):  Qt.size(screen.width, screen.height)
 
-    property string cfg_Image
-    property string cfg_ImageDefault
     property var cfg_SlidePaths: []
-    property var cfg_SlidePathsDefault: []
-    property alias cfg_Zoom: zoomSpinBox.value
-    property int cfg_ZoomDefault
-    property alias cfg_Crop: cropSpinBox.value
-    property int cfg_CropDefault
     property alias cfg_SlideDuration: durationSpinBox.value
     property int cfg_SlideDurationDefault
+    property var cfg_Images: []
+    property string cfg_ImagesDefault
+    property var cfg_Masks: []
+    property string cfg_MasksDefault
+    property var cfg_Zooms: []
+    property int cfg_ZoomsDefault
+    property var cfg_Crops: []
+    property int cfg_CropsDefault
+
+    property alias currentLayer: layerSpinBox.value
+
+    onCurrentLayerChanged: {
+        updateLayer();
+    }
+    Component.onCompleted: {
+        updateLayer();
+        console.log(wallpaperConfig);
+    }
+
+    function updateLayer() {
+        cfg_Zooms[currentLayer] = cfg_Zooms[currentLayer] || cfg_ZoomsDefault;
+        if (cfg_Crops[currentLayer] === undefined) cfg_Crops[currentLayer] = cfg_CropsDefault;
+        if (cfg_Images[currentLayer] === undefined) cfg_Images[currentLayer] = cfg_ImagesDefault;
+        if (cfg_Masks[currentLayer] === undefined) cfg_Masks[currentLayer] = cfg_MasksDefault;
+        zoomSpinBox.value = cfg_Zooms[currentLayer];
+        cropSpinBox.value = cfg_Crops[currentLayer];
+    }
 
     signal configurationChanged()
     /**
@@ -50,14 +70,20 @@ ColumnLayout {
     signal wallpaperBrowseCompleted();
 
     onScreenChanged: function() {
+        screenSize = !!root.screen.geometry ? Qt.size(root.screen.geometry.width, root.screen.geometry.height):  Qt.size(root.screen.width, root.screen.height);
         if (thumbnailsLoader.item) {
-            thumbnailsLoader.item.screenSize = !!root.screen.geometry ? Qt.size(root.screen.geometry.width, root.screen.geometry.height):  Qt.size(root.screen.width, root.screen.height);
+            thumbnailsLoader.item.screenSize = screenSize
         }
+        if (maskThumbnailsLoader.item) {
+            maskThumbnailsLoader.item.screenSize = screenSize;
+        }
+
     }
 
     function saveConfig() {
         imageWallpaper.wallpaperModel.commitAddition();
         imageWallpaper.wallpaperModel.commitDeletion();
+        console.log("xx", JSON.stringify(configDialog.wallpaperConfiguration));
     }
 
     function openChooserDialog() {
@@ -109,16 +135,30 @@ ColumnLayout {
         }
 
         QtControls2.SpinBox {
+            id: layerSpinBox
+            from: 0
+            to: cfg_Images.length + 1
+            stepSize: 1
+            value: currentLayer
+
+            Kirigami.FormData.label: i18nd("com.github.bojidar-bg.parallax", "Edit layer:")
+        }
+
+        QtControls2.SpinBox {
             id: zoomSpinBox
             from: 100
             to: 400
             stepSize: 1
             textFromValue: function(value) { return value + "  %"; } // https://bugreports.qt.io/browse/QTBUG-51022
             valueFromText: function(text) { return Number(text.split(" ")[0]); }
+            onValueChanged: {
+                cfg_Zooms[currentLayer] = value;
+                root.configurationChanged();
+            }
 
             Kirigami.FormData.label: i18nd("com.github.bojidar-bg.parallax", "Parallax Zoom Factor:")
             KCM.SettingHighlighter {
-                highlight: cfg_Zoom != cfg_ZoomDefault
+                highlight: cfg_Zooms[currentLayer] != cfg_ZoomsDefault;
             }
         }
 
@@ -129,55 +169,102 @@ ColumnLayout {
             stepSize: 1
             textFromValue: function(value) { return value + " %"; } // https://bugreports.qt.io/browse/QTBUG-51022
             valueFromText: function(text) { return Number(text.split(" ")[0]); }
+            onValueChanged: {
+                cfg_Crops[currentLayer] = value;
+                root.configurationChanged();
+            }
 
             Kirigami.FormData.label: i18nd("com.github.bojidar-bg.parallax", "Parallax Crop Factor:")
             KCM.SettingHighlighter {
-                highlight: cfg_Crop != cfg_CropDefault
+                highlight: cfg_Crops[currentLayer] != cfg_CropsDefault;
             }
         }
     }
 
-    DropArea {
-        Layout.fillWidth: true
-        Layout.fillHeight: true
+    RowLayout {
+        DropArea {
+            Layout.fillWidth: true
+            Layout.fillHeight: true
 
-        onEntered: drag => {
-            if (drag.hasUrls) {
-                drag.accept();
+            onEntered: drag => {
+                if (drag.hasUrls) {
+                    drag.accept();
+                }
             }
-        }
-        onDropped: drop => {
-            drop.urls.forEach(function (url) {
-                imageWallpaper.addUsersWallpaper(url);
-            });
-            // Scroll to top to view added images
-            thumbnailsLoader.item.view.positionViewAtIndex(0, GridView.Beginning);
-        }
-
-        Loader {
-            id: thumbnailsLoader
-            anchors.fill: parent
-
-            function loadWallpaper() {
-                let source = "ThumbnailsComponent.qml";
-
-                let props = {screenSize: screenSize};
-
-                thumbnailsLoader.setSource(source, props);
+            onDropped: drop => {
+                drop.urls.forEach(function (url) {
+                    imageWallpaper.addUsersWallpaper(url);
+                });
+                // Scroll to top to view added images
+                thumbnailsLoader.item.view.positionViewAtIndex(0, GridView.Beginning);
             }
-        }
 
-        Connections {
-            target: configDialog
-            function onCurrentWallpaperChanged() {
+            Loader {
+                id: thumbnailsLoader
+                anchors.fill: parent
+
+                function loadWallpaper() {
+                    let source = "ThumbnailsComponent.qml";
+
+                    let props = {screenSize: screenSize};
+
+                    thumbnailsLoader.setSource(source, props);
+                }
+            }
+
+            Connections {
+                target: configDialog
+                function onCurrentWallpaperChanged() {
+                    thumbnailsLoader.loadWallpaper();
+                }
+            }
+
+            Component.onCompleted: () => {
                 thumbnailsLoader.loadWallpaper();
             }
         }
+        DropArea {
+            Layout.fillWidth: true
+            Layout.fillHeight: true
+            visible: currentLayer > 0
 
-        Component.onCompleted: () => {
-            thumbnailsLoader.loadWallpaper();
+            onEntered: drag => {
+                if (drag.hasUrls) {
+                    drag.accept();
+                }
+            }
+            onDropped: drop => {
+                drop.urls.forEach(function (url) {
+                    imageWallpaper.addUsersWallpaper(url);
+                });
+                // Scroll to top to view added images
+                maskThumbnailsLoader.item.view.positionViewAtIndex(0, GridView.Beginning);
+            }
+
+            Loader {
+                id: maskThumbnailsLoader
+                anchors.fill: parent
+
+                function loadWallpaper() {
+                    let source = "ThumbnailsComponent.qml";
+
+                    let props = {screenSize: screenSize, isMask: true};
+
+                    maskThumbnailsLoader.setSource(source, props);
+                }
+            }
+
+            Connections {
+                target: configDialog
+                function onCurrentWallpaperChanged() {
+                    maskThumbnailsLoader.loadWallpaper();
+                }
+            }
+
+            Component.onCompleted: () => {
+                maskThumbnailsLoader.loadWallpaper();
+            }
         }
-
     }
 
     Component.onDestruction: {

@@ -19,65 +19,93 @@ WallpaperItem {
     function setUrl(url) {
         wallpaper.configuration.Image = url
     }
-
-    Rectangle {
-        id: backgroundColor
-        anchors.fill: parent
-        visible: image.status === Image.Ready
-        color: wallpaper.configuration.Color
-        Behavior on color {
-            ColorAnimation { duration: units.longDuration }
-        }
-    }
     
     TaskManager.VirtualDesktopInfo {
         id: virtualdesktopinfo
     }
-    
-    Image {
-        id: image
-        property var zoom: wallpaper.configuration.Zoom / 100
-        property var crop: wallpaper.configuration.Crop / 100
-        property var desktopRows: virtualdesktopinfo.desktopLayoutRows
-        property var desktopCols: Math.round(virtualdesktopinfo.numberOfDesktops / desktopRows)
-        property var currentDesktop: virtualdesktopinfo.desktopIds.indexOf(virtualdesktopinfo.currentDesktop)
-        property var aspect: implicitHeight / implicitWidth
-        property var coverWidth: Math.max(parent.width, parent.height / aspect)
-        
-        width: coverWidth * zoom
-        height: coverWidth * aspect * zoom
-        
-        property var ox: (currentDesktop % desktopCols) / (desktopCols - 1)
-        property var oy: Math.floor(currentDesktop / desktopCols) / (desktopRows - 1)
-        property var dx: parent.width - width
-        property var dy: parent.height - height
-        
-        x: lerp(dx * ox, dy * ox + (dx - dy) / 2, dx < dy ? crop : 0)
-        y: lerp(dy * oy, dx * oy + (dy - dx) / 2, dy < dx ? crop : 0)
-        
-        function lerp(x, y, t) {return (y - x) * t + x}
 
-        Behavior on x {
-            NumberAnimation {
-                duration: wallpaper.configuration.SlideDuration
-                easing.type: Easing.OutCubic
+    property var desktopRows: virtualdesktopinfo.desktopLayoutRows
+    property var desktopCols: Math.round(virtualdesktopinfo.numberOfDesktops / desktopRows)
+    property var currentDesktop: virtualdesktopinfo.desktopIds.indexOf(virtualdesktopinfo.currentDesktop)
+
+    function lerp(x, y, t) {return (y - x) * t + x}
+
+    MouseArea {
+        id: mouseArea
+        width: parent.width
+        height: parent.height
+        hoverEnabled: true
+    }
+    property var ox: (currentDesktop % desktopCols + mouseArea.mouseX / mouseArea.width) / (desktopCols)
+    property var oy: (Math.floor(currentDesktop / desktopCols)  + mouseArea.mouseY / mouseArea.height) / (desktopRows)
+
+    Repeater {
+        model: wallpaper.configuration.Images.length
+        delegate: Item {
+            Image {
+                id: img
+
+                source: mediaProxy.modelImage
+                width: parent.width
+                height: parent.height
+
+                Wallpaper.MediaProxy {
+                    id: mediaProxy
+                    source: wallpaper.configuration.Images[index]
+                    targetSize: Qt.size(root.width * Screen.devicePixelRatio, root.height * Screen.devicePixelRatio)
+                }
+                visible: index == 0
             }
-        }
-        
-        Behavior on y {
-            NumberAnimation {
-                duration: wallpaper.configuration.SlideDuration
-                easing.type: Easing.OutCubic
+            Image {
+                id: maskimg
+
+                source: mediaProxyMask.modelImage
+
+                Wallpaper.MediaProxy {
+                    id: mediaProxyMask
+                    source: wallpaper.configuration.Masks[index]
+                    targetSize: Qt.size(root.width * Screen.devicePixelRatio, root.height * Screen.devicePixelRatio)
+                }
+                visible: false
             }
-        }
 
-        source: mediaProxy.modelImage
+            property var zoom: wallpaper.configuration.Zooms[index] / 100
+            property var crop: wallpaper.configuration.Crops[index] / 100
+            property var aspect: img.implicitHeight / img.implicitWidth
+            property var coverWidth: Math.max(root.width, root.height / aspect)
 
-        Wallpaper.MediaProxy {
-            id: mediaProxy
-            source: wallpaper.configuration.Image
+            width: coverWidth * zoom
+            height: coverWidth * aspect * zoom
 
-            targetSize: Qt.size(root.width * Screen.devicePixelRatio, root.height * Screen.devicePixelRatio)
+            property var dx: root.width - width
+            property var dy: root.height - height
+
+            x: lerp(dx * ox, dy * ox + (dx - dy) / 2, dx < dy ? crop : 0)
+            y: lerp(dy * oy, dx * oy + (dy - dx) / 2, dy < dx ? crop : 0)
+
+            Behavior on x {
+                NumberAnimation {
+                    duration: wallpaper.configuration.SlideDuration
+                    easing.type: Easing.OutCubic
+                }
+            }
+
+            Behavior on y {
+                NumberAnimation {
+                    duration: wallpaper.configuration.SlideDuration
+                    easing.type: Easing.OutCubic
+                }
+            }
+
+            ShaderEffect {
+                width: parent.width
+                height: parent.height
+
+                property variant source: img
+                property variant mask: maskimg
+                fragmentShader: "mask.frag.qsb"
+                visible: index != 0
+            }
         }
     }
 }

@@ -6,23 +6,27 @@
   <kcfgfile name=""/>
 
   <group name="General">
-    <entry name="Image" type="String">
-      <label>Image used by the wallpaper</label>
-      <default></default>
-    </entry>
     <entry name="SlidePaths" type="String">
       <label></label>
       <default></default>
     </entry>
-    <entry name="SlideDuration" type="int">
+    <entry name="SlideDuration" type="Int">
       <label>The time over which parallax motion completes</label>
       <default>200</default>
     </entry>
-    <entry name="Zoom" type="int">
+    <entry name="Images" type="StringList">
+      <label>Image used by the wallpaper</label>
+      <default></default>
+    </entry>
+    <entry name="Masks" type="StringList">
+      <label>Image masks used by the wallpaper</label>
+      <default></default>
+    </entry>
+    <entry name="Zooms" type="IntList">
       <label>The amount by which the image is zoomed in, for the purposes of parallax motion</label>
       <default>120</default>
     </entry>
-    <entry name="Crop" type="int">
+    <entry name="Crops" type="IntList">
       <label>The percentage by which the sides of the image are cropped, in order for horizontal and vertical motion to be balanced</label>
       <default>0</default>
     </entry>
