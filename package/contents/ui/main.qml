@@ -19,16 +19,6 @@ WallpaperItem {
     function setUrl(url) {
         wallpaper.configuration.Image = url
     }
-
-    Rectangle {
-        id: backgroundColor
-        anchors.fill: parent
-        visible: image.status === Image.Ready
-        color: wallpaper.configuration.Color
-        Behavior on color {
-            ColorAnimation { duration: units.longDuration }
-        }
-    }
     
     TaskManager.VirtualDesktopInfo {
         id: virtualdesktopinfo

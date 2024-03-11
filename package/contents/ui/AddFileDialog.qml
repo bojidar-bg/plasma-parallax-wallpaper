@@ -14,7 +14,7 @@ Loader {
     id: dialogLoader
 
     asynchronous: true
-    sourceComponent: configDialog.currentWallpaper === "org.kde.image" ? addFileDialog : addFolderDialog
+    sourceComponent: addFileDialog
 
     readonly property url defaultFolder: {
         let defaultPaths = StandardPaths.standardLocations(StandardPaths.PicturesLocation);
