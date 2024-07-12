@@ -68,6 +68,7 @@ WallpaperItem {
             source: wallpaper.configuration.Image
 
             targetSize: Qt.size(root.width * Screen.devicePixelRatio, root.height * Screen.devicePixelRatio)
+            onColorSchemeChanged: mediaProxy.modelImageChanged() // HACK!  Work around the fact that https://invent.kde.org/plasma/plasma-workspace/-/blob/29d966e653dd7bdf80eed2c767b1edf9714a2916/wallpapers/image/plugin/utils/mediaproxy.cpp#L199 does not raise the modelImageChanged signal despite updating modelImage
         }
     }
 }
