@@ -37,8 +37,8 @@ WallpaperItem {
         width: coverWidth * zoom
         height: coverWidth * aspect * zoom
         
-        property var ox: (currentDesktop % desktopCols) / (desktopCols - 1)
-        property var oy: Math.floor(currentDesktop / desktopCols) / (desktopRows - 1)
+        property var ox: desktopCols > 1 ? (currentDesktop % desktopCols) / (desktopCols - 1) : 0.5
+        property var oy: desktopRows > 1 ? Math.floor(currentDesktop / desktopCols) / (desktopRows - 1) : 0.5
         property var dx: parent.width - width
         property var dy: parent.height - height
         
