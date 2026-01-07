@@ -57,24 +57,23 @@ KCM.GridDelegate {
     thumbnail: Rectangle {
         id: backgroundRect
         anchors.fill: parent
+        color: Kirigami.Theme.backgroundColor
 
         Kirigami.Icon {
             anchors.centerIn: parent
             width: Kirigami.Units.iconSizes.large
             height: width
             source: "view-preview"
-            visible: !walliePreview.visible
+            visible: walliePreview.status !== Image.Ready
         }
 
-        QPixmapItem {
+        Image {
             id: walliePreview
             anchors.fill: parent
-            visible: model.screenshot !== null
-            smooth: true
-            pixmap: model.screenshot
-            fillMode: {
-                return QPixmapItem.PreserveAspectCrop;
-            }
+            asynchronous: true
+            sourceSize: Qt.size(parent.width, parent.height)
+            source: model.path 
+            fillMode: Image.PreserveAspectCrop
         }
     }
 
