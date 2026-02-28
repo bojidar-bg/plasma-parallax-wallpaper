@@ -72,7 +72,7 @@ KCM.GridDelegate {
             anchors.fill: parent
             asynchronous: true
             sourceSize: Qt.size(parent.width, parent.height)
-            source: model.path 
+            source: model.preview 
             fillMode: Image.PreserveAspectCrop
         }
     }
@@ -85,7 +85,7 @@ KCM.GridDelegate {
     }
 
     onClicked: {
-        cfg_Image = model.packageName || model.path;
+        cfg_Image = model.source;
         if (typeof wallpaper !== "undefined") {
             wallpaper.configuration.PreviewImage = cfg_Image;
         }
